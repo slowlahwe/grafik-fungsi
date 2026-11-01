@@ -1,0 +1,259 @@
+
+classdef grafik_fungsi_kuadrat < matlab.apps.AppBase
+
+    % Properties komponen aplikasi
+    properties (Access = public)
+        UIFigure matlab.ui.Figure
+        UIAxes matlab.ui.control.UIAxes
+
+        MasukanPanel matlab.ui.container.Panel
+        KeluaranPanel matlab.ui.container.Panel
+
+        AEditField matlab.ui.control.NumericEditField
+        BEditField matlab.ui.control.NumericEditField
+        CEditField matlab.ui.control.NumericEditField
+
+        AEditFieldLabel matlab.ui.control.Label
+        BEditFieldLabel matlab.ui.control.Label
+        CEditFieldLabel matlab.ui.control.Label
+
+        ProsesButton matlab.ui.control.Button
+
+        TitikPuncakEditField matlab.ui.control.EditField
+        SumbuSimetriEditField matlab.ui.control.EditField
+        DiskriminanEditField matlab.ui.control.EditField
+        PotongXEditField matlab.ui.control.EditField
+        PotongYEditField matlab.ui.control.EditField
+        ArahEditField matlab.ui.control.EditField
+
+        TitikPuncakLabel matlab.ui.control.Label
+        SumbuSimetriLabel matlab.ui.control.Label
+        DiskriminanLabel matlab.ui.control.Label
+        PotongXLabel matlab.ui.control.Label
+        PotongYLabel matlab.ui.control.Label
+        ArahLabel matlab.ui.control.Label
+    end
+
+    % Callback tombol Proses
+    methods (Access = private)
+
+        function ProsesButtonPushed(app, event)
+
+            % Mengambil nilai koefisien
+            a = app.AEditField.Value;
+            b = app.BEditField.Value;
+            c = app.CEditField.Value;
+
+            % Memastikan fungsi merupakan fungsi kuadrat
+            if a == 0
+                uialert(app.UIFigure, ...
+                    'Nilai a tidak boleh 0 karena bukan fungsi kuadrat.', ...
+                    'Peringatan');
+                return;
+            end
+
+            % Menentukan rentang grafik
+            xp = -b/(2*a);
+            x = linspace(xp-10, xp+10, 500);
+
+            % Menghitung nilai fungsi
+            y = a*x.^2 + b*x + c;
+
+            % Menggambar grafik
+            cla(app.UIAxes);
+            plot(app.UIAxes, x, y, 'r', 'LineWidth', 2);
+            hold(app.UIAxes, 'on');
+            grid(app.UIAxes, 'on');
+
+            % Sumbu koordinat
+            xline(app.UIAxes, 0, 'k');
+            yline(app.UIAxes, 0, 'k');
+
+            % Menghitung titik puncak
+            yp = a*xp^2 + b*xp + c;
+
+            % Menampilkan titik puncak
+            plot(app.UIAxes, xp, yp, 'bo', ...
+                'MarkerFaceColor', 'b', 'MarkerSize', 7);
+
+            title(app.UIAxes, 'Grafik Fungsi Kuadrat');
+            xlabel(app.UIAxes, 'Nilai x');
+            ylabel(app.UIAxes, 'Nilai f(x)');
+
+            hold(app.UIAxes, 'off');
+
+            % Menghitung diskriminan
+            D = b^2 - 4*a*c;
+
+            % Menentukan titik potong sumbu X
+            if D > 0
+                x1 = (-b + sqrt(D))/(2*a);
+                x2 = (-b - sqrt(D))/(2*a);
+                potongX = sprintf('(%.2f, 0) dan (%.2f, 0)', x1, x2);
+
+            elseif D == 0
+                x1 = -b/(2*a);
+                potongX = sprintf('(%.2f, 0)', x1);
+
+            else
+                potongX = 'Tidak memotong sumbu X';
+            end
+
+            % Menentukan arah parabola
+            if a > 0
+                arah = 'Terbuka ke atas';
+            else
+                arah = 'Terbuka ke bawah';
+            end
+
+            % Menampilkan hasil perhitungan
+            app.TitikPuncakEditField.Value = ...
+                sprintf('(%.2f, %.2f)', xp, yp);
+
+            app.SumbuSimetriEditField.Value = ...
+                sprintf('x = %.2f', xp);
+
+            app.DiskriminanEditField.Value = ...
+                num2str(D);
+
+            app.PotongXEditField.Value = potongX;
+
+            app.PotongYEditField.Value = ...
+                sprintf('(0, %.2f)', c);
+
+            app.ArahEditField.Value = arah;
+
+        end
+    end
+
+    % Membuat komponen aplikasi
+    methods (Access = private)
+
+        function createComponents(app)
+
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.Position = [100 100 850 550];
+            app.UIFigure.Name = 'Media Pembelajaran Fungsi Kuadrat';
+
+            % Grafik
+            app.UIAxes = uiaxes(app.UIFigure);
+            app.UIAxes.Position = [30 220 790 300];
+
+            % Panel masukan
+            app.MasukanPanel = uipanel(app.UIFigure);
+            app.MasukanPanel.Title = 'Masukan Koefisien';
+            app.MasukanPanel.Position = [30 35 230 160];
+
+            % Input A
+            app.AEditFieldLabel = uilabel(app.MasukanPanel);
+            app.AEditFieldLabel.Position = [15 100 50 22];
+            app.AEditFieldLabel.Text = 'Nilai a';
+
+            app.AEditField = uieditfield(app.MasukanPanel, 'numeric');
+            app.AEditField.Position = [85 100 120 22];
+            app.AEditField.Value = 1;
+
+            % Input B
+            app.BEditFieldLabel = uilabel(app.MasukanPanel);
+            app.BEditFieldLabel.Position = [15 65 50 22];
+            app.BEditFieldLabel.Text = 'Nilai b';
+
+            app.BEditField = uieditfield(app.MasukanPanel, 'numeric');
+            app.BEditField.Position = [85 65 120 22];
+            app.BEditField.Value = -4;
+
+            % Input C
+            app.CEditFieldLabel = uilabel(app.MasukanPanel);
+            app.CEditFieldLabel.Position = [15 30 50 22];
+            app.CEditFieldLabel.Text = 'Nilai c';
+
+            app.CEditField = uieditfield(app.MasukanPanel, 'numeric');
+            app.CEditField.Position = [85 30 120 22];
+            app.CEditField.Value = 3;
+
+            % Tombol proses
+            app.ProsesButton = uibutton(app.UIFigure, 'push');
+            app.ProsesButton.Position = [285 90 100 35];
+            app.ProsesButton.Text = 'Proses';
+            app.ProsesButton.ButtonPushedFcn = ...
+                createCallbackFcn(app, @ProsesButtonPushed, true);
+
+            % Panel keluaran
+            app.KeluaranPanel = uipanel(app.UIFigure);
+            app.KeluaranPanel.Title = 'Hasil Analisis';
+            app.KeluaranPanel.Position = [410 25 410 175];
+
+            % Titik puncak
+            app.TitikPuncakLabel = uilabel(app.KeluaranPanel);
+            app.TitikPuncakLabel.Position = [15 125 100 22];
+            app.TitikPuncakLabel.Text = 'Titik Puncak';
+
+            app.TitikPuncakEditField = uieditfield(app.KeluaranPanel, 'text');
+            app.TitikPuncakEditField.Position = [125 125 260 22];
+
+            % Sumbu simetri
+            app.SumbuSimetriLabel = uilabel(app.KeluaranPanel);
+            app.SumbuSimetriLabel.Position = [15 100 100 22];
+            app.SumbuSimetriLabel.Text = 'Sumbu Simetri';
+
+            app.SumbuSimetriEditField = uieditfield(app.KeluaranPanel, 'text');
+            app.SumbuSimetriEditField.Position = [125 100 260 22];
+
+            % Diskriminan
+            app.DiskriminanLabel = uilabel(app.KeluaranPanel);
+            app.DiskriminanLabel.Position = [15 75 100 22];
+            app.DiskriminanLabel.Text = 'Diskriminan';
+
+            app.DiskriminanEditField = uieditfield(app.KeluaranPanel, 'text');
+            app.DiskriminanEditField.Position = [125 75 260 22];
+
+            % Potong X
+            app.PotongXLabel = uilabel(app.KeluaranPanel);
+            app.PotongXLabel.Position = [15 50 100 22];
+            app.PotongXLabel.Text = 'Potong sumbu X';
+
+            app.PotongXEditField = uieditfield(app.KeluaranPanel, 'text');
+            app.PotongXEditField.Position = [125 50 260 22];
+
+            % Potong Y
+            app.PotongYLabel = uilabel(app.KeluaranPanel);
+            app.PotongYLabel.Position = [15 25 100 22];
+            app.PotongYLabel.Text = 'Potong sumbu Y';
+
+            app.PotongYEditField = uieditfield(app.KeluaranPanel, 'text');
+            app.PotongYEditField.Position = [125 25 260 22];
+
+            % Arah parabola
+            app.ArahLabel = uilabel(app.KeluaranPanel);
+            app.ArahLabel.Position = [15 2 100 22];
+            app.ArahLabel.Text = 'Arah Parabola';
+
+            app.ArahEditField = uieditfield(app.KeluaranPanel, 'text');
+            app.ArahEditField.Position = [125 2 260 22];
+
+            app.UIFigure.Visible = 'on';
+
+        end
+    end
+
+    % Konstruktor aplikasi
+    methods (Access = public)
+
+        function app = grafik_fungsi_kuadrat
+
+            createComponents(app);
+            registerApp(app, app.UIFigure);
+
+            if nargout == 0
+                clear app
+            end
+
+        end
+
+        function delete(app)
+
+            delete(app.UIFigure);
+
+        end
+    end
+end
